@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+
+  ltl_api:
+    build:
+      context: ../API
+      dockerfile: api.dockerfile
+    container_name: LittleAPI
+    env_file:
+      - .env
+    ports:
+      - "${API_PORT}:8000"
+    volumes:
+      - ../API:/LittleAPI
+    command: python3 main.py
