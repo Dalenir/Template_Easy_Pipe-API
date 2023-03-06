@@ -7,7 +7,6 @@ LABEL master = 'Neveric'
 
 RUN mkdir /LittleAPI
 WORKDIR /LittleAPI
-
 COPY ./requirements.txt /tmp/
 
 RUN apt-get update

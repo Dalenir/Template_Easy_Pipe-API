@@ -2,32 +2,31 @@
 
 ---
 
-- Рабочей папкой указать API
-- Deploy/.env трогать можете
-- Логи: папка /logs
+- Make sure set API folder as source in Pycharm project
+- Enviromental variables: Deploy/.env
+- Logs: /logs
 
 ---
 
-## Конфигурация
-**Базовая настройка производится в Deploy/.env**
+## Enviromental variables
+**Deploy/.env**
 
-| Параметр             | Описание                                                                                                                | Значение по умолчанию |
+| Variable             | Description                                                                                                                | Default |
 |----------------------|-------------------------------------------------------------------------------------------------------------------------|-----------------------|
-| API_PORT             | Номер порта, на котором запустится API сервер.<br/> *`Цифра`*                                                           | `8008 `               |
-| DEBUG_MODE           | Дебаг-мод. Только важные логи, автоперезагрузка сервера при изменениях в коде.<br/> *`Строка`* : `'True'/'False`        | `True`                |
-| COMPOSE_PROJECT_NAME | Имя compose проекта в списке контейнеров. Исключительно декоративно. <br/>*`Строка`*                                    | `Little_API_Project`  |
-| DOCKER               | Способ запуска. Установить `True` если запуск в контейнере, если запуск из PyCharm <br/> *`Строка`* : `'True'/'False`   | `'True'`              |
+| API_PORT             | Port number <br/> *`INT`*                                                           | `8008 `               |
+| DEBUG_MODE           | Debyg mode for development. More logs, autoreload from disk. <br/> *`String`* : `'True'/'False`        | `True`                |
+| COMPOSE_PROJECT_NAME | Name of compose group in docker listing. <br/>*`Строка`*                                    | `Little_API_Project`  |
+| DOCKER               | Launch method. Set on "Docker" for launch in container. Setting DEBUG_MODE on False. <br/> *`String`* : `'True'/'False`   | `'True'`              |
 
 
 ---
 
-## Известные проблемы:
+## Known Issues:
 
 
-#### 1. При запуске из контейнера докера не работает автоперезагрузка в дебаг моде.
-*Временно ([?](https://youtrack.jetbrains.com/issue/PY-57217)) невозможно использование одновременно автоматической перезагрузки API из кода и дебаггера PyCharm. Проблема временно решена в сторону вторго.*
+#### 1. Issue 1
+#### 1. Issue 2
 
+### Usefull commands:
 
-### Полезные команды:
-
-**Прогнать все тесты (отчеты формируются в папке API/reports)**: `docker compose -f Deploy/main_compose.yml run --rm ltl_api /bin/sh tests/all_tests_comm.sh`
+**All tests**: `docker compose -f Deploy/main_compose.yml run --rm ltl_api /bin/sh tests/all_tests_comm.sh`
