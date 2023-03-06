@@ -1,44 +1,26 @@
-import os
-
-import uvicorn
 from fastapi import FastAPI, Path
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from uvicorn import Server, Config
 
+from API.endpoints import example_points
+from API.settings import Settings, main_settings
 from api_loggers.log import main_logger
 
 app = FastAPI()
+app.include_router(example_points.router)
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
-@app.get("/hello/{name}")
-async def say_hello(name: str = Path(default=None, regex="^[a-zA-Z0-9_]*$")):
-    return {"message": f"Hello {name}"}
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc):
-    main_logger.infolog.info(f'Error with request {request.url}: RequestValidationError')
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=jsonable_encoder({"detail": exc.errors()[0]['msg']}),
-    )
-
-
-if __name__ == "__main__":
+def server_setup(settings: Settings = main_settings):
     main_logger.infolog.info('Logger is ready!')
 
-    port = os.getenv('API_PORT', '8008')
+    outer_port = settings.API_PORT or 8000
 
-    debug_mode = True if os.getenv('DEBUG_MODE') == 'True' else False
-    container_enviroment = True if os.getenv('DOCKER') == 'True' else False
+    debug_mode = settings.DEBUG_MODE
+    container_enviroment = settings.DOCKER
 
     if container_enviroment:
         host = "0.0.0.0"
@@ -46,16 +28,21 @@ if __name__ == "__main__":
     else:
         debug_mode = True
         host = 'localhost'
-        port = 8008
+        port = outer_port
 
     if debug_mode:
-        main_logger.infolog.info(f'[S] API ROOT http://localhost:{port}')
-        main_logger.infolog.info(f'[S] API DOCS http://localhost:{port}/docs')
+        main_logger.infolog.info(f'[S] API ROOT http://localhost:{outer_port}')
+        main_logger.infolog.info(f'[S] API DOCS http://localhost:{outer_port}/docs')
         log_level = 'warning'
         reload_policy = False if container_enviroment else True  # Известная проблема см. README (1)
     else:
-        main_logger.infolog.info(f'API WIIL BE STARTED IN PRODUCTION MODE AT PORT :{port}')
+        main_logger.infolog.info(f'API WIIL BE STARTED IN PRODUCTION MODE AT PORT :{outer_port}')
         log_level = 'info'
         reload_policy = False
 
-    uvicorn.run('main:app', host=host, port=port, log_level=log_level, reload=reload_policy)
+    return Server(config=Config('main:app', host=host, port=port, log_level=log_level, reload=reload_policy))
+
+
+if __name__ == "__main__":
+    server = server_setup()
+    server.run()
