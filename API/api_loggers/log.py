@@ -3,6 +3,8 @@ import pathlib
 from datetime import datetime
 from colorama import init, Fore, Back
 
+from settings import main_settings
+
 
 class ColorFormatter(logging.Formatter):
     init(autoreset=True)
@@ -27,11 +29,12 @@ class BotLogger:
     infolog = None
 
     def __init__(self):
-        today_for_log = datetime.now().strftime('%Y-%m-%d')
-        pathlib.Path('../logs/').mkdir(parents=True, exist_ok=True)
         self.infolog = logging.getLogger("main")
         self.infolog.setLevel(logging.INFO)
-        self.infolog.addHandler(logging.FileHandler(filename=f"../logs/{today_for_log}.log", mode='a'))
+        if main_settings.LOG_FILE:
+            today_for_log = datetime.now().strftime('%Y-%m-%d')
+            pathlib.Path('../logs/').mkdir(parents=True, exist_ok=True)
+            self.infolog.addHandler(logging.FileHandler(filename=f"../logs/{today_for_log}.log", mode='a'))
         color_formatter = ColorFormatter("%(name)-10s %(levelname)-18s %(message)s")
         console = logging.StreamHandler()
         console.setFormatter(color_formatter)

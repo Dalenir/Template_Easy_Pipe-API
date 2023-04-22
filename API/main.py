@@ -1,42 +1,37 @@
-from fastapi import FastAPI, Path
-from fastapi.encoders import jsonable_encoder
-from fastapi.exceptions import RequestValidationError
-from starlette import status
-from starlette.requests import Request
-from starlette.responses import JSONResponse
+from fastapi import FastAPI
 from uvicorn import Server, Config
 
-from API.endpoints import example_points
-from API.settings import Settings, main_settings
+from endpoints import example_points
+from settings import Settings, main_settings, AppMode
 from api_loggers.log import main_logger
 
-app = FastAPI()
+docs_url = '/docs' if main_settings.APP_MODE == AppMode.DEV else None
+redoc_url = '/redoc' if main_settings.APP_MODE == AppMode.DEV else None
+
+app = FastAPI(
+    docs_url=docs_url,
+    redoc_url=redoc_url
+)
+
 app.include_router(example_points.router)
 
 
 def server_setup(settings: Settings = main_settings):
     main_logger.infolog.info('Logger is ready!')
 
-    outer_port = settings.API_PORT or 8000
-
-    debug_mode = settings.DEBUG_MODE
-    container_enviroment = settings.DOCKER
-
-    if container_enviroment:
+    if settings.DOCKER:
         host = "0.0.0.0"
         port = 8000
     else:
-        debug_mode = True
         host = 'localhost'
-        port = outer_port
-
-    if debug_mode:
-        main_logger.infolog.info(f'[S] API ROOT http://localhost:{outer_port}')
-        main_logger.infolog.info(f'[S] API DOCS http://localhost:{outer_port}/docs')
+        port = settings.API_PORT
+    if settings.APP_MODE == AppMode.DEV:
+        main_logger.infolog.info(f'[S] API ROOT http://localhost:{settings.API_PORT}')
+        main_logger.infolog.info(f'[S] API DOCS http://localhost:{settings.API_PORT}/docs')
+        reload_policy = True
         log_level = 'warning'
-        reload_policy = False if container_enviroment else True  # Известная проблема см. README (1)
     else:
-        main_logger.infolog.info(f'API WIIL BE STARTED IN PRODUCTION MODE AT PORT :{outer_port}')
+        main_logger.infolog.info(f'API STARTED IN PRODUCTION MODE AT PORT :{settings.API_PORT}')
         log_level = 'info'
         reload_policy = False
 
