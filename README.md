@@ -11,8 +11,20 @@
 
 ## Fast start
 
-### 1. 
-    
+1) Copy .env file from example:
+   ```sh
+   cp Deploy/.env.example Deploy/.env
+   ```
+
+2) Build image:
+   ```sh
+   docker compose -f Deploy/main_compose.yml build
+   ```
+
+3) Start image:
+   ```sh
+   docker compose -f Deploy/main_compose.yml up
+   ```
 
 
 ---
@@ -35,7 +47,8 @@
 ## Known Issues:
 
 
-#### 1. Example
+#### 1. Hot reload still not working.
+I wanted to create simple one-compose solution but sadly uviorn really do not want to reload on code changes. If problem persists, I think I will try to separate compose file on two different.
 #### 2. Second Expample
 
 ### Usefull commands:
